@@ -1,0 +1,40 @@
+cmake_minimum_required(VERSION 3.10)
+project(TCPProxy)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Detect platform and set appropriate flags
+if(WIN32)
+    message(STATUS "Configuring for Windows")
+    # Windows specific setup
+    set(BOOST_ROOT "C:/local/boost_1_75_0") # Set your Boost root folder
+    find_package(Boost REQUIRED)
+else()
+    message(STATUS "Configuring for Linux")
+    # Linux specific setup
+    find_package(Boost REQUIRED)
+endif()
+
+# Find spdlog (this can be installed globally or you can use it as a submodule)
+find_package(spdlog REQUIRED)
+
+# Add include and src directories
+include_directories(include)
+
+# Add source files
+add_executable(tcp_proxy src/main.cpp src/TcpProxy.cpp src/Logger.cpp src/Config.cpp)
+
+# Link Boost and spdlog
+target_link_libraries(tcp_proxy Boost::Boost spdlog::spdlog)
+
+# If you are on Windows, you might need to link additional libraries like ws2_32 (Winsock)
+if(WIN32)
+    target_link_libraries(tcp_proxy ws2_32)
+endif()
+
+# Enable CMake warnings for better development practices
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DDEBUG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+endif()
